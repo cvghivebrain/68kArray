@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2021/10/18 03:26:46.000.215,=D:\Delphi\Unit1.pas</Transaction>
+    <Transaction>2021/10/18 03:27:52.000.125,D:\Delphi\Unit1.pas=D:\GitHub\68kArray\Unit1.pas</Transaction>
+    <Transaction>2021/10/18 03:27:52.000.125,D:\Delphi\Unit1.dfm=D:\GitHub\68kArray\Unit1.dfm</Transaction>
+    <Transaction>2021/10/18 03:27:54.000.728,D:\Delphi\Project1.dproj=D:\GitHub\68kArray\Project1.dproj</Transaction>
+  </Transactions>
+</BorlandProject>
