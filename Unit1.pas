@@ -27,6 +27,8 @@ type
     function Explode(s, d: string; n: integer): string;
     procedure GetInput;
     procedure Store(s: string; w: integer);
+    procedure ShowOutput;
+    function GetItem(pos, w: integer): string;
   public
     { Public declarations }
   end;
@@ -127,7 +129,7 @@ begin
   if i < 0 then i := (1 shl (w*8))-i; // Convert i to unsigned.
   SetLength(data,Length(data)+w); // Extend data array.
   for k := 0 to w-1 do
-    data[Length(data)-1-k] := (i shr (w*8)) and $ff; // Write byte to end of array.
+    data[Length(data)-1-k] := (i shr (k*8)) and $ff; // Write byte to end of array.
 end;
 
 procedure TForm1.memInputChange(Sender: TObject);
@@ -135,6 +137,71 @@ begin
   SetLength(data,0); // Clear data array.
   GetInput; // Get input data.
   lblCount.Caption := InttoStr(Length(data))+' bytes found'; // Update counter display.
+  ShowOutput;
+end;
+
+{ Show contents of data array with new formatting. }
+procedure TForm1.ShowOutput;
+var i, j, w, items, fulllines, itemslastline, bytesleftover, pos: integer;
+  s: string;
+begin
+  memOutput.Lines.Clear; // Clear all lines.
+  w := boxType.ItemIndex+1+(boxType.ItemIndex div 2); // Convert 0/1/2 to 1/2/4.
+  items := Length(data) div w; // Total number of items.
+  fulllines := items div StrtoInt(editRow.Text); // Number of full lines.
+  itemslastline := items mod StrtoInt(editRow.Text); // Items on last line.
+  bytesleftover := Length(data) mod w; // Leftover odd bytes after words/longwords.
+  pos := 0;
+  // Full lines.
+  for i := 0 to fulllines-1 do
+    begin
+    s := boxType.Items[boxType.ItemIndex]+' '; // Write dc.b/w/l.
+    for j := 0 to StrtoInt(editRow.Text)-1 do
+      begin
+      s := s+GetItem(pos,w)+', ';
+      pos := pos+w;
+      end;
+    Delete(s,Length(s)-1,2); // Trim final comma and space.
+    memOutput.Lines.Add(s); // Write line.
+    end;
+  // Last line.
+  if itemslastline > 0 then
+    begin
+    s := boxType.Items[boxType.ItemIndex]+' '; // Write dc.b/w/l.
+    for j := 0 to itemslastline-1 do
+      begin
+      s := s+GetItem(pos,w)+', ';
+      pos := pos+w;
+      end;
+    Delete(s,Length(s)-1,2); // Trim final comma and space.
+    memOutput.Lines.Add(s); // Write line.
+    end;
+  // Leftovers.
+  if bytesleftover > 0 then
+    begin
+    s := 'dc.b '; // Write dc.b.
+    for j := 0 to bytesleftover-1 do
+      begin
+      s := s+GetItem(pos,1)+', ';
+      Inc(pos);
+      end;
+    Delete(s,Length(s)-1,2); // Trim final comma and space.
+    memOutput.Lines.Add(s); // Write line.
+    end;
+end;
+
+{ Get byte/word/longword from data array and convert to string. }
+function TForm1.GetItem(pos, w: integer): string;
+var s: string;
+  i: integer;
+begin
+  s := '';
+  for i := 0 to w-1 do
+    begin
+    s := s+InttoHex(data[pos],2);
+    Inc(pos);
+    end;
+  result := '$'+s;
 end;
 
 end.
