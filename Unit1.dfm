@@ -63,13 +63,19 @@ object Form1: TForm1
       ParentFont = False
       TabOrder = 0
       Text = '16'
+      OnChange = editRowChange
     end
     object udRow: TUpDown
-      Left = 104
+      Left = 98
       Top = 16
       Width = 17
-      Height = 25
+      Height = 23
+      Associate = editRow
+      Min = 1
+      Max = 1000
+      Position = 16
       TabOrder = 1
+      Thousands = False
     end
     object boxType: TComboBox
       Left = 11
@@ -80,6 +86,7 @@ object Form1: TForm1
       ItemIndex = 0
       TabOrder = 2
       Text = 'dc.b'
+      OnChange = boxTypeChange
       Items.Strings = (
         'dc.b'
         'dc.w'
@@ -94,6 +101,7 @@ object Form1: TForm1
       Checked = True
       State = cbChecked
       TabOrder = 3
+      OnClick = chkSignedClick
     end
     object editIndent: TLabeledEdit
       Left = 139
@@ -111,13 +119,46 @@ object Form1: TForm1
       ParentFont = False
       TabOrder = 4
       Text = '2'
+      OnChange = editIndentChange
     end
-    object UpDown1: TUpDown
+    object udIndent: TUpDown
       Left = 232
       Top = 16
       Width = 17
-      Height = 25
+      Height = 23
+      Associate = editIndent
+      Position = 2
       TabOrder = 5
+      Thousands = False
+    end
+    object chkDollar: TCheckBox
+      Left = 11
+      Top = 110
+      Width = 97
+      Height = 17
+      Caption = 'Omit $ for 0-9'
+      Checked = True
+      State = cbChecked
+      TabOrder = 6
+      OnClick = chkDollarClick
+    end
+    object chk0s: TCheckBox
+      Left = 11
+      Top = 125
+      Width = 97
+      Height = 17
+      Caption = 'Leading 0s'
+      TabOrder = 7
+      OnClick = chk0sClick
+    end
+    object chkSpace: TCheckBox
+      Left = 11
+      Top = 140
+      Width = 97
+      Height = 17
+      Caption = 'Even spacing'
+      TabOrder = 8
+      OnClick = chkSpaceClick
     end
   end
   object grpMenu: TGroupBox

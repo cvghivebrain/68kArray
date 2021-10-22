@@ -19,9 +19,19 @@ type
     boxType: TComboBox;
     chkSigned: TCheckBox;
     editIndent: TLabeledEdit;
-    UpDown1: TUpDown;
+    udIndent: TUpDown;
+    chkDollar: TCheckBox;
+    chk0s: TCheckBox;
+    chkSpace: TCheckBox;
     procedure FormResize(Sender: TObject);
     procedure memInputChange(Sender: TObject);
+    procedure editRowChange(Sender: TObject);
+    procedure editIndentChange(Sender: TObject);
+    procedure boxTypeChange(Sender: TObject);
+    procedure chkSignedClick(Sender: TObject);
+    procedure chkDollarClick(Sender: TObject);
+    procedure chk0sClick(Sender: TObject);
+    procedure chkSpaceClick(Sender: TObject);
   private
     { Private declarations }
     function Explode(s, d: string; n: integer): string;
@@ -29,6 +39,7 @@ type
     procedure Store(s: string; w: integer);
     procedure ShowOutput;
     function GetItem(pos, w: integer): string;
+    function CleanNum(s: string; d: integer): string;
   public
     { Public declarations }
   end;
@@ -36,6 +47,8 @@ type
 var
   Form1: TForm1;
   data: array of byte;
+const
+  w2: array[1..4] of int64 = ($100,$10000,0,$100000000);
 
 implementation
 
@@ -122,11 +135,12 @@ end;
 
 { Convert string to bytes and store in array. }
 procedure TForm1.Store(s: string; w: integer);
-var i, k: integer;
+var i: int64;
+  k: integer;
 begin
-  if TryStrtoInt(s,i) = true then i := StrtoInt(s) // Convert string to integer.
+  if TryStrtoInt64(s,i) = true then i := StrtoInt64(s) // Convert string to integer.
     else i := 0; // Use 0 if not valid.
-  if i < 0 then i := (1 shl (w*8))-i; // Convert i to unsigned.
+  if i < 0 then i := w2[w]+i; // Convert i to unsigned.
   SetLength(data,Length(data)+w); // Extend data array.
   for k := 0 to w-1 do
     data[Length(data)-1-k] := (i shr (k*8)) and $ff; // Write byte to end of array.
@@ -143,8 +157,13 @@ end;
 { Show contents of data array with new formatting. }
 procedure TForm1.ShowOutput;
 var i, j, w, items, fulllines, itemslastline, bytesleftover, pos: integer;
-  s: string;
+  s, indent: string;
 begin
+  editRow.Text := CleanNum(editRow.Text,16);
+  editIndent.Text := CleanNum(editIndent.Text,2);
+  indent := '';
+  for i := 0 to StrtoInt(editIndent.Text)-1 do indent := #9+indent; // Add indents.
+
   memOutput.Lines.Clear; // Clear all lines.
   w := boxType.ItemIndex+1+(boxType.ItemIndex div 2); // Convert 0/1/2 to 1/2/4.
   items := Length(data) div w; // Total number of items.
@@ -162,7 +181,7 @@ begin
       pos := pos+w;
       end;
     Delete(s,Length(s)-1,2); // Trim final comma and space.
-    memOutput.Lines.Add(s); // Write line.
+    memOutput.Lines.Add(indent+s); // Write line.
     end;
   // Last line.
   if itemslastline > 0 then
@@ -174,7 +193,7 @@ begin
       pos := pos+w;
       end;
     Delete(s,Length(s)-1,2); // Trim final comma and space.
-    memOutput.Lines.Add(s); // Write line.
+    memOutput.Lines.Add(indent+s); // Write line.
     end;
   // Leftovers.
   if bytesleftover > 0 then
@@ -186,22 +205,85 @@ begin
       Inc(pos);
       end;
     Delete(s,Length(s)-1,2); // Trim final comma and space.
-    memOutput.Lines.Add(s); // Write line.
+    memOutput.Lines.Add(indent+s); // Write line.
     end;
 end;
 
 { Get byte/word/longword from data array and convert to string. }
 function TForm1.GetItem(pos, w: integer): string;
-var s: string;
-  i: integer;
+var s, neg, dol, r: string;
+  i, rwidth: integer;
+  n: int64;
 begin
   s := '';
+  neg := '';
+  dol := '$';
+  n := 0;
   for i := 0 to w-1 do
     begin
-    s := s+InttoHex(data[pos],2);
+    n := data[pos]+(n shl 8);
     Inc(pos);
     end;
-  result := '$'+s;
+  if chkSigned.Checked = true then
+    if ((w = 1) and (n > $7f)) or ((w = 2) and (n > $7fff)) or ((w = 4) and (n > $7fffffff)) then
+      begin
+      n := w2[w]-n; // Convert to negative if signed.
+      neg := '-'; // Use negative sign.
+      end;
+  if (chkDollar.Checked = true) and (n < 10) then dol := ''; // Omit $ for 0-9.
+  s := InttoHex(n);
+  if chk0s.Checked = true then s := Copy(s,Length(s)-(w*2)+1,w*2) // Trim to width of byte/word/longword.
+    else while (s[1] = '0') and (Length(s) > 1) do
+      s := Copy(s,2,Length(s)-1); // Trim leading 0s.
+  rwidth := (w*2)+1; // Width of output +1 for $.
+  if chkSigned.Checked = true then Inc(rwidth); // +1 for negative sign.
+  r := neg+dol+s;
+  if chkSpace.Checked = true then
+    while Length(r) < rwidth do r := ' '+r; // Pad with spaces.
+  result := r;
+end;
+
+procedure TForm1.boxTypeChange(Sender: TObject);
+begin
+  ShowOutput;
+end;
+
+procedure TForm1.chk0sClick(Sender: TObject);
+begin
+  ShowOutput;
+end;
+
+procedure TForm1.chkDollarClick(Sender: TObject);
+begin
+  ShowOutput;
+end;
+
+procedure TForm1.chkSignedClick(Sender: TObject);
+begin
+  ShowOutput;
+end;
+
+procedure TForm1.chkSpaceClick(Sender: TObject);
+begin
+  ShowOutput;
+end;
+
+procedure TForm1.editIndentChange(Sender: TObject);
+begin
+  ShowOutput;
+end;
+
+procedure TForm1.editRowChange(Sender: TObject);
+begin
+  ShowOutput;
+end;
+
+function TForm1.CleanNum(s: string; d: integer): string;
+var i: integer;
+begin
+  if (s = '') or ((s = '0') and (d = 16)) then result := InttoStr(d) // Set to default if blank or 0.
+  else if TryStrtoInt(s,i) = false then result := InttoStr(d) // Set to default if invalid.
+  else result := s;
 end;
 
 end.
