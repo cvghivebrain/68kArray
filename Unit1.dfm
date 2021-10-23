@@ -11,6 +11,7 @@ object Form1: TForm1
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  OnCreate = FormCreate
   OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
@@ -25,7 +26,9 @@ object Form1: TForm1
     Font.Name = 'Fixedsys'
     Font.Style = []
     ParentFont = False
+    ScrollBars = ssBoth
     TabOrder = 0
+    WordWrap = False
     OnChange = memInputChange
   end
   object memOutput: TMemo
@@ -39,7 +42,9 @@ object Form1: TForm1
     Font.Name = 'Fixedsys'
     Font.Style = []
     ParentFont = False
+    ScrollBars = ssBoth
     TabOrder = 1
+    WordWrap = False
   end
   object grpMenu2: TGroupBox
     Left = 439
@@ -122,7 +127,7 @@ object Form1: TForm1
       OnChange = editIndentChange
     end
     object udIndent: TUpDown
-      Left = 232
+      Left = 226
       Top = 16
       Width = 17
       Height = 23
@@ -174,5 +179,32 @@ object Form1: TForm1
       Height = 13
       Caption = '0 bytes found'
     end
+    object btnSave: TButton
+      Left = 144
+      Top = 32
+      Width = 121
+      Height = 49
+      Caption = 'Save to BIN'
+      TabOrder = 0
+      OnClick = btnSaveClick
+    end
+    object btnOpen: TButton
+      Left = 11
+      Top = 32
+      Width = 121
+      Height = 49
+      Caption = 'Open from BIN'
+      TabOrder = 1
+      OnClick = btnOpenClick
+    end
+  end
+  object dlgOpen: TOpenDialog
+    Left = 8
+    Top = 544
+  end
+  object dlgSave: TSaveDialog
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
+    Left = 56
+    Top = 544
   end
 end

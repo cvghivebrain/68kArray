@@ -23,6 +23,10 @@ type
     chkDollar: TCheckBox;
     chk0s: TCheckBox;
     chkSpace: TCheckBox;
+    dlgOpen: TOpenDialog;
+    btnSave: TButton;
+    btnOpen: TButton;
+    dlgSave: TSaveDialog;
     procedure FormResize(Sender: TObject);
     procedure memInputChange(Sender: TObject);
     procedure editRowChange(Sender: TObject);
@@ -32,6 +36,9 @@ type
     procedure chkDollarClick(Sender: TObject);
     procedure chk0sClick(Sender: TObject);
     procedure chkSpaceClick(Sender: TObject);
+    procedure btnOpenClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure btnSaveClick(Sender: TObject);
   private
     { Private declarations }
     function Explode(s, d: string; n: integer): string;
@@ -39,7 +46,7 @@ type
     procedure Store(s: string; w: integer);
     procedure ShowOutput;
     function GetItem(pos, w: integer): string;
-    function CleanNum(s: string; d: integer): string;
+    function CleanNum(s: string; d, min: integer): string;
   public
     { Public declarations }
   end;
@@ -47,6 +54,7 @@ type
 var
   Form1: TForm1;
   data: array of byte;
+  enablegetinput: boolean;
 const
   w2: array[1..4] of int64 = ($100,$10000,0,$100000000);
 
@@ -81,6 +89,11 @@ begin
     if n < 0 then s := AnsiReverseString(s); // Un-reverse string if negative.
     result := s;
     end;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  enablegetinput := true;
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
@@ -148,10 +161,13 @@ end;
 
 procedure TForm1.memInputChange(Sender: TObject);
 begin
-  SetLength(data,0); // Clear data array.
-  GetInput; // Get input data.
+  if enablegetinput = true then
+    begin
+    SetLength(data,0); // Clear data array.
+    GetInput; // Get input data.
+    ShowOutput;
+    end;
   lblCount.Caption := InttoStr(Length(data))+' bytes found'; // Update counter display.
-  ShowOutput;
 end;
 
 { Show contents of data array with new formatting. }
@@ -159,8 +175,8 @@ procedure TForm1.ShowOutput;
 var i, j, w, items, fulllines, itemslastline, bytesleftover, pos: integer;
   s, indent: string;
 begin
-  editRow.Text := CleanNum(editRow.Text,16);
-  editIndent.Text := CleanNum(editIndent.Text,2);
+  editRow.Text := CleanNum(editRow.Text,16,1);
+  editIndent.Text := CleanNum(editIndent.Text,2,0);
   indent := '';
   for i := 0 to StrtoInt(editIndent.Text)-1 do indent := #9+indent; // Add indents.
 
@@ -278,12 +294,47 @@ begin
   ShowOutput;
 end;
 
-function TForm1.CleanNum(s: string; d: integer): string;
+function TForm1.CleanNum(s: string; d, min: integer): string;
 var i: integer;
 begin
-  if (s = '') or ((s = '0') and (d = 16)) then result := InttoStr(d) // Set to default if blank or 0.
+  if (s = '') or ((s = '0') and (min > 0)) then result := InttoStr(d) // Set to default if blank or 0.
   else if TryStrtoInt(s,i) = false then result := InttoStr(d) // Set to default if invalid.
   else result := s;
+end;
+
+procedure TForm1.btnOpenClick(Sender: TObject);
+var myfile: file;
+  i: integer;
+begin
+  if dlgOpen.Execute then
+    begin
+    AssignFile(myfile,dlgOpen.FileName); // Get file.
+    FileMode := fmOpenRead;
+    Reset(myfile,1); // Read only.
+    SetLength(data,FileSize(myfile));
+    BlockRead(myfile,data[0],FileSize(myfile)); // Copy file to memory.
+    CloseFile(myfile); // Close file.
+    ShowOutput;
+    enablegetinput := false; // Disable GetInput while text is copied.
+    memInput.Clear;
+    for i := 0 to memOutput.Lines.Count-1 do memInput.Lines.Add(memOutput.Lines[i]); // Copy text to input side.
+    enablegetinput := true;
+    end;
+end;
+
+procedure TForm1.btnSaveClick(Sender: TObject);
+var myfile: file;
+  fname: string;
+begin
+  if dlgSave.Execute then
+    begin
+    fname := dlgSave.FileName;
+    if ExtractFileExt(fname) = '' then fname := fname+'.bin'; // Add .bin if no extension found.
+    AssignFile(myfile,fname); // Create output file.
+    ReWrite(myfile,1);
+    BlockWrite(myfile,data[0],Length(data)); // Copy data to file.
+    CloseFile(myfile);
+    end;
 end;
 
 end.
