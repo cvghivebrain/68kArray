@@ -27,6 +27,8 @@ type
     btnSave: TButton;
     btnOpen: TButton;
     dlgSave: TSaveDialog;
+    btnSaveTxt: TButton;
+    btnCopy: TButton;
     procedure FormResize(Sender: TObject);
     procedure memInputChange(Sender: TObject);
     procedure editRowChange(Sender: TObject);
@@ -39,6 +41,8 @@ type
     procedure btnOpenClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnSaveClick(Sender: TObject);
+    procedure btnSaveTxtClick(Sender: TObject);
+    procedure btnCopyClick(Sender: TObject);
   private
     { Private declarations }
     function Explode(s, d: string; n: integer): string;
@@ -167,7 +171,8 @@ begin
     GetInput; // Get input data.
     ShowOutput;
     end;
-  lblCount.Caption := InttoStr(Length(data))+' bytes found'; // Update counter display.
+  if Length(data) < 10 then lblCount.Caption := InttoStr(Length(data))+' bytes found' // Update counter display.
+  else lblCount.Caption := InttoStr(Length(data))+' ($'+InttoHex(Length(data),1)+') bytes found';
 end;
 
 { Show contents of data array with new formatting. }
@@ -294,11 +299,11 @@ begin
   ShowOutput;
 end;
 
-function TForm1.CleanNum(s: string; d, min: integer): string;
+function TForm1.CleanNum(s: string; default, min: integer): string;
 var i: integer;
 begin
-  if (s = '') or ((s = '0') and (min > 0)) then result := InttoStr(d) // Set to default if blank or 0.
-  else if TryStrtoInt(s,i) = false then result := InttoStr(d) // Set to default if invalid.
+  if (s = '') or ((s = '0') and (min > 0)) then result := InttoStr(default) // Set to default if blank or 0.
+  else if TryStrtoInt(s,i) = false then result := InttoStr(default) // Set to default if invalid.
   else result := s;
 end;
 
@@ -335,6 +340,24 @@ begin
     BlockWrite(myfile,data[0],Length(data)); // Copy data to file.
     CloseFile(myfile);
     end;
+end;
+
+procedure TForm1.btnSaveTxtClick(Sender: TObject);
+var myfile: file;
+  fname: string;
+begin
+  if dlgSave.Execute then
+    begin
+    fname := dlgSave.FileName;
+    if ExtractFileExt(fname) = '' then fname := fname+'.txt'; // Add .txt if no extension found.
+    memOutput.Lines.SaveToFile(fname); // Save to file.
+    end;
+end;
+
+procedure TForm1.btnCopyClick(Sender: TObject);
+begin
+  memOutput.SelectAll;
+  memOutput.CopyToClipboard;
 end;
 
 end.

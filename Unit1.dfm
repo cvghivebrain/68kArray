@@ -50,7 +50,7 @@ object Form1: TForm1
     Left = 439
     Top = 351
     Width = 425
-    Height = 178
+    Height = 149
     TabOrder = 2
     object editRow: TLabeledEdit
       Left = 11
@@ -83,8 +83,8 @@ object Form1: TForm1
       Thousands = False
     end
     object boxType: TComboBox
-      Left = 11
-      Top = 67
+      Left = 264
+      Top = 17
       Width = 110
       Height = 22
       Style = csOwnerDrawFixed
@@ -98,8 +98,8 @@ object Form1: TForm1
         'dc.l')
     end
     object chkSigned: TCheckBox
-      Left = 11
-      Top = 95
+      Left = 264
+      Top = 45
       Width = 97
       Height = 17
       Caption = 'Signed'
@@ -137,8 +137,8 @@ object Form1: TForm1
       Thousands = False
     end
     object chkDollar: TCheckBox
-      Left = 11
-      Top = 110
+      Left = 264
+      Top = 60
       Width = 97
       Height = 17
       Caption = 'Omit $ for 0-9'
@@ -148,8 +148,8 @@ object Form1: TForm1
       OnClick = chkDollarClick
     end
     object chk0s: TCheckBox
-      Left = 11
-      Top = 125
+      Left = 264
+      Top = 75
       Width = 97
       Height = 17
       Caption = 'Leading 0s'
@@ -157,20 +157,38 @@ object Form1: TForm1
       OnClick = chk0sClick
     end
     object chkSpace: TCheckBox
-      Left = 11
-      Top = 140
+      Left = 264
+      Top = 90
       Width = 97
       Height = 17
       Caption = 'Even spacing'
       TabOrder = 8
       OnClick = chkSpaceClick
     end
+    object btnSaveTxt: TButton
+      Left = 11
+      Top = 60
+      Width = 121
+      Height = 35
+      Caption = 'Save to text file...'
+      TabOrder = 9
+      OnClick = btnSaveTxtClick
+    end
+    object btnCopy: TButton
+      Left = 11
+      Top = 101
+      Width = 121
+      Height = 35
+      Caption = 'Copy to clipboard'
+      TabOrder = 10
+      OnClick = btnCopyClick
+    end
   end
   object grpMenu: TGroupBox
     Left = 8
     Top = 351
     Width = 425
-    Height = 178
+    Height = 149
     TabOrder = 3
     object lblCount: TLabel
       Left = 11
@@ -180,11 +198,11 @@ object Form1: TForm1
       Caption = '0 bytes found'
     end
     object btnSave: TButton
-      Left = 144
-      Top = 32
+      Left = 11
+      Top = 73
       Width = 121
-      Height = 49
-      Caption = 'Save to BIN'
+      Height = 35
+      Caption = 'Save to binary file...'
       TabOrder = 0
       OnClick = btnSaveClick
     end
@@ -192,8 +210,8 @@ object Form1: TForm1
       Left = 11
       Top = 32
       Width = 121
-      Height = 49
-      Caption = 'Open from BIN'
+      Height = 35
+      Caption = 'Open from binary file...'
       TabOrder = 1
       OnClick = btnOpenClick
     end
