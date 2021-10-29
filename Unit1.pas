@@ -29,6 +29,7 @@ type
     dlgSave: TSaveDialog;
     btnSaveTxt: TButton;
     btnCopy: TButton;
+    lblAbout: TLabel;
     procedure FormResize(Sender: TObject);
     procedure memInputChange(Sender: TObject);
     procedure editRowChange(Sender: TObject);
@@ -50,7 +51,7 @@ type
     procedure Store(s: string; w: integer);
     procedure ShowOutput;
     function GetItem(pos, w: integer): string;
-    function CleanNum(s: string; d, min: integer): string;
+    function CleanNum(s: string; default, min: integer): string;
   public
     { Public declarations }
   end;
@@ -112,6 +113,7 @@ begin
   grpMenu2.Width := memOutput.Width;
   grpMenu2.Top := grpMenu.Top;
   grpMenu2.Left := memOutput.Left;
+  lblAbout.Left := grpMenu.Width-lblAbout.Width-4;
 end;
 
 { Get data from input text and store in byte array. }
@@ -184,7 +186,6 @@ begin
   editIndent.Text := CleanNum(editIndent.Text,2,0);
   indent := '';
   for i := 0 to StrtoInt(editIndent.Text)-1 do indent := #9+indent; // Add indents.
-
   memOutput.Lines.Clear; // Clear all lines.
   w := boxType.ItemIndex+1+(boxType.ItemIndex div 2); // Convert 0/1/2 to 1/2/4.
   items := Length(data) div w; // Total number of items.
@@ -357,7 +358,7 @@ end;
 procedure TForm1.btnCopyClick(Sender: TObject);
 begin
   memOutput.SelectAll;
-  memOutput.CopyToClipboard;
+  memOutput.CopyToClipboard; // Copy output to clipboard.
 end;
 
 end.

@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = '68kArray'
+  Caption = '68kArray v1.0'
   ClientHeight = 661
   ClientWidth = 1076
   Color = clBtnFace
@@ -197,9 +197,18 @@ object Form1: TForm1
       Height = 13
       Caption = '0 bytes found'
     end
+    object lblAbout: TLabel
+      Left = 280
+      Top = 3
+      Width = 142
+      Height = 38
+      Alignment = taRightJustify
+      Caption = 'Programmed by Hivebrain github.com/cvghivebrain'
+      WordWrap = True
+    end
     object btnSave: TButton
       Left = 11
-      Top = 73
+      Top = 101
       Width = 121
       Height = 35
       Caption = 'Save to binary file...'
@@ -208,7 +217,7 @@ object Form1: TForm1
     end
     object btnOpen: TButton
       Left = 11
-      Top = 32
+      Top = 60
       Width = 121
       Height = 35
       Caption = 'Open from binary file...'
