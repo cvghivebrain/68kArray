@@ -30,6 +30,8 @@ type
     btnSaveTxt: TButton;
     btnCopy: TButton;
     lblAbout: TLabel;
+    btnClear: TButton;
+    chkDecimal: TCheckBox;
     procedure FormResize(Sender: TObject);
     procedure memInputChange(Sender: TObject);
     procedure editRowChange(Sender: TObject);
@@ -44,6 +46,8 @@ type
     procedure btnSaveClick(Sender: TObject);
     procedure btnSaveTxtClick(Sender: TObject);
     procedure btnCopyClick(Sender: TObject);
+    procedure btnClearClick(Sender: TObject);
+    procedure chkDecimalClick(Sender: TObject);
   private
     { Private declarations }
     function Explode(s, d: string; n: integer): string;
@@ -252,12 +256,14 @@ begin
       n := w2[w]-n; // Convert to negative if signed.
       neg := '-'; // Use negative sign.
       end;
-  if (chkDollar.Checked = true) and (n < 10) then dol := ''; // Omit $ for 0-9.
-  s := InttoHex(n);
+  if ((chkDollar.Checked = true) and (n < 10)) or (chkDecimal.Checked = true) then dol := ''; // Omit $ for 0-9 or decimal.
+  if chkDecimal.Checked = false then s := InttoHex(n)
+    else s := InttoStr(n);
   if chk0s.Checked = true then s := Copy(s,Length(s)-(w*2)+1,w*2) // Trim to width of byte/word/longword.
     else while (s[1] = '0') and (Length(s) > 1) do
       s := Copy(s,2,Length(s)-1); // Trim leading 0s.
-  rwidth := (w*2)+1; // Width of output +1 for $.
+  if chkDecimal.Checked = false then rwidth := (w*2)+1 // Width of output +1 for $.
+    else rwidth := (w*2)+1+(w div 4); // Width of output for decimal.
   if chkSigned.Checked = true then Inc(rwidth); // +1 for negative sign.
   r := neg+dol+s;
   if chkSpace.Checked = true then
@@ -271,6 +277,11 @@ begin
 end;
 
 procedure TForm1.chk0sClick(Sender: TObject);
+begin
+  ShowOutput;
+end;
+
+procedure TForm1.chkDecimalClick(Sender: TObject);
 begin
   ShowOutput;
 end;
@@ -353,6 +364,14 @@ begin
     if ExtractFileExt(fname) = '' then fname := fname+'.txt'; // Add .txt if no extension found.
     memOutput.Lines.SaveToFile(fname); // Save to file.
     end;
+end;
+
+procedure TForm1.btnClearClick(Sender: TObject);
+begin
+  memInput.Clear;
+  SetLength(data,0); // Clear data array.
+  memOutput.Clear;
+  lblCount.Caption := '0 bytes found';
 end;
 
 procedure TForm1.btnCopyClick(Sender: TObject);

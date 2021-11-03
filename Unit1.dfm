@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = '68kArray v1.0'
+  Caption = '68kArray v1.1'
   ClientHeight = 661
   ClientWidth = 1076
   Color = clBtnFace
@@ -183,6 +183,15 @@ object Form1: TForm1
       TabOrder = 10
       OnClick = btnCopyClick
     end
+    object chkDecimal: TCheckBox
+      Left = 264
+      Top = 105
+      Width = 97
+      Height = 17
+      Caption = 'Decimal'
+      TabOrder = 11
+      OnClick = chkDecimalClick
+    end
   end
   object grpMenu: TGroupBox
     Left = 8
@@ -198,10 +207,10 @@ object Form1: TForm1
       Caption = '0 bytes found'
     end
     object lblAbout: TLabel
-      Left = 280
+      Left = 296
       Top = 3
-      Width = 142
-      Height = 38
+      Width = 126
+      Height = 26
       Alignment = taRightJustify
       Caption = 'Programmed by Hivebrain github.com/cvghivebrain'
       WordWrap = True
@@ -223,6 +232,15 @@ object Form1: TForm1
       Caption = 'Open from binary file...'
       TabOrder = 1
       OnClick = btnOpenClick
+    end
+    object btnClear: TButton
+      Left = 138
+      Top = 60
+      Width = 121
+      Height = 35
+      Caption = 'Clear all'
+      TabOrder = 2
+      OnClick = btnClearClick
     end
   end
   object dlgOpen: TOpenDialog
