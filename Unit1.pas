@@ -32,6 +32,7 @@ type
     lblAbout: TLabel;
     btnClear: TButton;
     chkDecimal: TCheckBox;
+    chkOutput: TCheckBox;
     procedure FormResize(Sender: TObject);
     procedure memInputChange(Sender: TObject);
     procedure editRowChange(Sender: TObject);
@@ -54,7 +55,7 @@ type
     procedure GetInput;
     procedure Store(s: string; w: integer);
     procedure ShowOutput;
-    function GetItem(pos, w: integer): string;
+    function GetItem(pos, w, padwidth: integer): string;
     function CleanNum(s: string; default, min: integer): string;
   public
     { Public declarations }
@@ -183,27 +184,32 @@ end;
 
 { Show contents of data array with new formatting. }
 procedure TForm1.ShowOutput;
-var i, j, w, items, fulllines, itemslastline, bytesleftover, pos: integer;
+var i, j, w, items, fulllines, itemslastline, bytesleftover, pos, padwidth: integer;
   s, indent: string;
+label nooutput;
 begin
+  memOutput.Lines.Clear; // Clear all lines.
+  if chkOutput.Checked = true then goto nooutput;
   editRow.Text := CleanNum(editRow.Text,16,1);
   editIndent.Text := CleanNum(editIndent.Text,2,0);
   indent := '';
   for i := 0 to StrtoInt(editIndent.Text)-1 do indent := #9+indent; // Add indents.
-  memOutput.Lines.Clear; // Clear all lines.
   w := boxType.ItemIndex+1+(boxType.ItemIndex div 2); // Convert 0/1/2 to 1/2/4.
   items := Length(data) div w; // Total number of items.
   fulllines := items div StrtoInt(editRow.Text); // Number of full lines.
   itemslastline := items mod StrtoInt(editRow.Text); // Items on last line.
   bytesleftover := Length(data) mod w; // Leftover odd bytes after words/longwords.
   pos := 0;
+  if chkDecimal.Checked = false then padwidth := (w*2)+1 // Width of output +1 for $.
+    else padwidth := (w*2)+1+(w div 4); // Width of output for decimal.
+  if chkSigned.Checked = true then Inc(padwidth); // +1 for negative sign.
   // Full lines.
   for i := 0 to fulllines-1 do
     begin
     s := boxType.Items[boxType.ItemIndex]+' '; // Write dc.b/w/l.
     for j := 0 to StrtoInt(editRow.Text)-1 do
       begin
-      s := s+GetItem(pos,w)+', ';
+      s := s+GetItem(pos,w,padwidth)+', ';
       pos := pos+w;
       end;
     Delete(s,Length(s)-1,2); // Trim final comma and space.
@@ -215,7 +221,7 @@ begin
     s := boxType.Items[boxType.ItemIndex]+' '; // Write dc.b/w/l.
     for j := 0 to itemslastline-1 do
       begin
-      s := s+GetItem(pos,w)+', ';
+      s := s+GetItem(pos,w,padwidth)+', ';
       pos := pos+w;
       end;
     Delete(s,Length(s)-1,2); // Trim final comma and space.
@@ -225,20 +231,23 @@ begin
   if bytesleftover > 0 then
     begin
     s := 'dc.b '; // Write dc.b.
+    padwidth := 3; // Width of output for bytes.
+    if chkSigned.Checked = true then padwidth := 4; // +1 for negative sign.
     for j := 0 to bytesleftover-1 do
       begin
-      s := s+GetItem(pos,1)+', ';
+      s := s+GetItem(pos,1,padwidth)+', ';
       Inc(pos);
       end;
     Delete(s,Length(s)-1,2); // Trim final comma and space.
     memOutput.Lines.Add(indent+s); // Write line.
     end;
+  nooutput:
 end;
 
 { Get byte/word/longword from data array and convert to string. }
-function TForm1.GetItem(pos, w: integer): string;
+function TForm1.GetItem(pos, w, padwidth: integer): string;
 var s, neg, dol, r: string;
-  i, rwidth: integer;
+  i: integer;
   n: int64;
 begin
   s := '';
@@ -262,12 +271,9 @@ begin
   if chk0s.Checked = true then s := Copy(s,Length(s)-(w*2)+1,w*2) // Trim to width of byte/word/longword.
     else while (s[1] = '0') and (Length(s) > 1) do
       s := Copy(s,2,Length(s)-1); // Trim leading 0s.
-  if chkDecimal.Checked = false then rwidth := (w*2)+1 // Width of output +1 for $.
-    else rwidth := (w*2)+1+(w div 4); // Width of output for decimal.
-  if chkSigned.Checked = true then Inc(rwidth); // +1 for negative sign.
   r := neg+dol+s;
   if chkSpace.Checked = true then
-    while Length(r) < rwidth do r := ' '+r; // Pad with spaces.
+    while Length(r) < padwidth do r := ' '+r; // Pad with spaces.
   result := r;
 end;
 
